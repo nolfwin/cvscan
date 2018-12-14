@@ -26,17 +26,49 @@ def main():
 @click.option('--name', '-n', help='Parse resume')
 def parse(name):
   """
+  Parse resume\n
+  Params: name Type: string\n
+  Usage: cvscan parse --name <name>\n
+  to parse file: ~/cvscan/<name>.pdf
+
+  """
+  import os
+
+  for filename in os.listdir(name):
+       if os.path.isfile(name+'/'+filename+'/CV.json'):
+         continue
+       try:
+         resume = Cvscan(name+'/'+filename+'/CV')
+         resume.parse()
+         pprint.pprint(resume.show(), width=1)
+         f = open(name+'/'+filename+'/CV.json', 'w+')
+         f.write(resume.show())
+       except Exception as e:
+         print(e)
+       try:
+         print(filename)
+       except:
+         pass
+
+
+@main.command()
+@click.option('--dir', '-d', help='Parse resume for the whole directory')
+def parsedir(dir):
+  """
 
   Parse resume\n
   Params: name Type: string\n
   Usage: cvscan parse --name <name>\n
   to parse file: ~/cvscan/<name>.pdf
-  
-  """
-  resume = Cvscan(name)
-  resume.parse()
-  pprint.pprint(resume.show(), width=1)
 
+  """
+  import os
+  for filename in os.listdir('/Users/nontawat.charoenphakdee/workspace/cvscan/'+dir):
+       resume = Cvscan(dir+'/'+filename[:-4])
+       resume.parse()
+       pprint.pprint(resume.show(), width=1)
+       f = open(filename, 'w+')
+       f.write(resume.show())
 
 @main.command()
 @click.option('--org','-o',help='Explicitly add organizations')
@@ -99,10 +131,10 @@ def remove(org,skill,job,qual,extra):
   Remove data from consideration\n
   Params:\n
   org Type: comma separated string\n
-  skill Type: comma separated string\n  
+  skill Type: comma separated string\n
   job Type: comma separated string\n
   qual Type: comma separated string\n
-  Usage:\n   
+  Usage:\n
   For removing organization:\n
   cvscan remove --org <org_name,org_name,..>\n
   For removing skill:\n
